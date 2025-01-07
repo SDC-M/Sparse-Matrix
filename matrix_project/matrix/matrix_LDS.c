@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>
 #include "matrix_LDS.h"
 
 typedef struct cell cell;
@@ -71,7 +72,7 @@ int modification(matrix *m, size_t row, size_t col, int value) {
   return r;
 }
 
-int suppression(matrix *m, size_t row, size_t col) {
+int delete_element(matrix *m, size_t row, size_t col) {
   cell *p = research(m, col, row);
   if (p == nullptr) {
     return EOF;
@@ -134,7 +135,7 @@ void *add_element(matrix *m, size_t row, size_t col, int value) {
 }
 
 void print_dim(matrix *m) {
-  printf("%zu\tx\t%zu\n", m->nb_rows, m->nb_cols);
+  printf("%zu\tx\t%zu\n\n", m->nb_rows, m->nb_cols);
 }
 
 void print_matrix(matrix *m) {
@@ -155,7 +156,7 @@ void print_matrix(matrix *m) {
   printf("\n");
 }
 
-matrix *add(matrix *m1, matrix *m2) {
+matrix *add_mat(matrix *m1, matrix *m2) {
   if (m1->nb_cols != m2->nb_cols && m1->nb_rows != m2->nb_rows) {
     return nullptr;
   }
@@ -168,6 +169,10 @@ matrix *add(matrix *m1, matrix *m2) {
   while (p != nullptr || q != nullptr) {
     if (p != nullptr && q != nullptr) {
       if (p->row == q->row && p->col == q->col) {
+        if (p->value > INT_MAX - q->value) {
+          matrix_dispose(&m);
+          return nullptr;
+        }
         int sum = p->value + q->value;
         if (sum != 0) {
           if (add_element(m, p->row, p->col, sum) == nullptr) {
@@ -209,6 +214,21 @@ matrix *add(matrix *m1, matrix *m2) {
 
 matrix *self_mult_by_scalar(matrix *m, int scalar) {
   cell *p = m->head;
+  if (scalar == 0) {
+    while (p != nullptr) {
+      cell *q = p;
+      p = p->next;
+      free(q);
+    }
+    m->head = nullptr;
+    m->nb_element = 0;
+    m->nb_rows = 0;
+    m->nb_cols = 0;
+    return m;
+  }
+  if (p->value > INT_MAX / scalar) {
+    return nullptr;
+  }
   while (p != nullptr) {
     p->value *= scalar;
     p = p->next;
@@ -284,4 +304,30 @@ int **to_dense_matrix(matrix *m) {
     t[p->row][p->col] = p->value;
   }
   return t;
+}
+
+matrix *swap_row(matrix *m, size_t row1, size_t row2) {
+  if (is_empty(m) || m->nb_rows <= 1
+      || row1 == row2
+      || row1 >= m->nb_rows
+      || row2 >= m->nb_rows) {
+    return nullptr;
+  }
+  matrix *new_matrix = matrix_empty();
+  if (new_matrix == nullptr) {
+    return nullptr;
+  }
+  for (cell *p = m->head; p != nullptr; p = p->next) {
+    size_t new_row = p->row;
+    if (new_row == row1) {
+      new_row = row2;
+    } else if (new_row == row2) {
+      new_row = row1;
+    }
+    if (add_element(new_matrix, new_row, p->col, p->value) == nullptr) {
+      matrix_dispose(&new_matrix);
+      return nullptr;
+    }
+  }
+  return new_matrix;
 }

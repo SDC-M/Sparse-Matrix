@@ -4,7 +4,9 @@
 //  Fonctionnement général :
 
 //  L'extension est formée des éventuelles déclarations et définitions qui
-//    figurent aux lignes 89-103.
+//    figurent aux lignes 94-113.
+
+//  Les indices de lignes / colonnes commencent à 0.
 
 //  Les identificateurs introduits par l'extension ainsi que les identificateurs
 //    de macro MAT_EXT et WANT_MAT_EXT sont réservés pour être utilisés
@@ -57,9 +59,9 @@ extern void *add_element(matrix *m, size_t row, size_t col, int value);
 // modification : renvoie EOF si l'element n'existe pas sinon l'ancienne valeur.
 extern int modification(matrix *m, size_t row, size_t col, int value);
 
-//  suppression : renvoie EOF si l'element n'existe pas sinon libère la cellule
-//   associé et renvoie la valeur supprimée.
-extern int suppression(matrix *m, size_t row, size_t col);
+//  delete_element : renvoie EOF si l'element n'existe pas sinon libère la
+//   cellule associé et renvoie la valeur supprimée.
+extern int delete_element(matrix *m, size_t row, size_t col);
 
 //  print_dim : affiche sur la sortie standart la dimension associé à la matrice
 //   pointée par m.
@@ -69,12 +71,12 @@ extern void print_dim(matrix *m);
 //   matrice pointée par m.
 extern void print_matrix(matrix *m);
 
-//  add : tente d'allouer les ressources nécéssaires à la création d'une
-// nouvelle
-//   matrice représentant l'addition des matrices pointées par m1 et m2.
-extern matrix *add(matrix *m1, matrix *m2);
+//  add_mat : tente d'allouer les ressources nécéssaires à la création d'une
+// nouvelle matrice représentant l'addition des matrices pointées par m1 et m2.
+extern matrix *add_mat(matrix *m1, matrix *m2);
 
-// self_mult_by_scalar : renvoie la matrice multipliée par un scalaire.
+// self_mult_by_scalar : renvoie la matrice multipliée par un scalaire, en cas
+//    de dépassement de capacité renvoie nullptr.
 extern matrix *self_mult_by_scalar(matrix *m, int scalar);
 
 //  mult_mat : tente d'allouer les ressources nécéssaires à la création d'une
@@ -102,6 +104,11 @@ extern matrix *to_sparse_matrix(int **t, size_t rows, size_t cols);
 //   d'une nouvelle matrice representant la matrice pleine associé à la matrice
 //   creuse pointée par m.
 extern int **to_dense_matrix(matrix *m);
+
+//  swap_row : tente d'allouer les ressources nécéssaires à la création d'une
+//   nouvelle matrice representant l'échange des lignes données en paramètre
+//   si les lignes n'existent pas ou si la matrice est vide renvoie nullptr.
+extern matrix *swap_row(matrix *m, size_t row1, size_t row2);
 
 //- EXTENSION -^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^
 
